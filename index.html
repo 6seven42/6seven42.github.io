@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cat Browser</title>
+<link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+<style>
+:root{--win:#fff8e1;--ink:#2b1b3d;--pink:#ff4fa3;--yellow:#ffe45e;--teal:#1fb5a8;--bar:#e9ddff;--s1:#c9b6ff;--s2:#ffb3d9;--s3:#fff0a8;--s4:#9be7ff}
+@media (prefers-color-scheme:dark){:root{--win:#2d2147;--ink:#fff3c9;--bar:#463570;--s1:#3a2a63;--s2:#5a2a55;--s3:#4a3a2a;--s4:#1f4a5a}}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:"Chewy","Comic Sans MS",cursive;font-size:18px;padding:14px;min-height:100vh;position:relative}
+body::before{content:"";position:fixed;inset:-50%;z-index:-2;background:repeating-linear-gradient(135deg,var(--s1) 0 60px,var(--s2) 60px 120px,var(--s3) 120px 180px,var(--s4) 180px 240px);animation:slide 12s linear infinite}
+@keyframes slide{to{transform:translate(170px,170px)}}
+#floaters{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+#floaters span{position:absolute;bottom:-60px;animation:rise linear infinite;filter:drop-shadow(3px 3px 0 rgba(43,27,61,.35))}
+@keyframes rise{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(-120vh) rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){body::before,#floaters span,.goof .card{animation:none!important}}
+.win{max-width:1100px;margin:0 auto;background:var(--win);border:4px solid var(--ink);border-radius:18px;box-shadow:10px 10px 0 var(--ink);overflow:hidden}
+.title{display:flex;align-items:center;gap:10px;padding:8px 14px;background:linear-gradient(90deg,var(--pink),var(--yellow));color:#2b1b3d;border-bottom:4px solid var(--ink);font-size:24px}
+.title .dots{margin-left:auto;display:flex;gap:6px}
+.title .dots i{width:22px;height:22px;border:3px solid #2b1b3d;border-radius:50%;background:#fff8e1;display:block}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;background:var(--bar);border-bottom:4px solid var(--ink)}
+button{font:inherit;color:#2b1b3d;background:var(--yellow);border:3px solid var(--ink);border-radius:12px;padding:4px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+button:hover{background:var(--teal)}button:active{transform:translate(3px,3px);box-shadow:none}
+button[aria-pressed="true"]{background:var(--pink)}
+button:focus-visible{outline:4px solid var(--teal);outline-offset:3px}
+.addr{flex:1;min-width:180px;background:var(--win);border:3px solid var(--ink);border-radius:999px;padding:4px 16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticker{background:var(--ink);color:var(--yellow);overflow:hidden;white-space:nowrap;border-bottom:4px solid var(--ink)}
+.ticker span{display:inline-block;padding:6px 0 6px 100%;animation:run 22s linear infinite}
+@keyframes run{to{transform:translateX(-100%)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px;padding:24px}
+.empty{grid-column:1/-1;text-align:center;font-size:24px;padding:30px}
+.card{position:relative;background:#fff;color:#2b1b3d;border:4px solid var(--ink);border-radius:14px;padding:8px;box-shadow:6px 6px 0 var(--ink);transition:transform .2s}
+.card:nth-child(3n+1){transform:rotate(-2.5deg)}.card:nth-child(3n+2){transform:rotate(1.8deg)}.card:nth-child(3n){transform:rotate(-.8deg)}
+.card:hover,.card:focus-within{transform:rotate(0) scale(1.05)}
+.open{all:unset;display:block;width:100%;cursor:pointer}
+.open:focus-visible{outline:4px solid var(--teal);outline-offset:3px}
+.card img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:3px solid #2b1b3d;background:#e9ddff}
+.card b{display:block;font-weight:400;font-size:22px;margin-top:6px}
+.card small{font-size:16px;opacity:.8}
+.heart{position:absolute;top:14px;right:14px;padding:0 9px;font-size:24px;line-height:1.3;border-radius:50%;background:#fff}
+.heart[aria-pressed="true"]{background:var(--pink)}
+.goof .card{animation:wob 1.4s ease-in-out infinite alternate}
+.goof .card:nth-child(even){animation-delay:-.7s}
+@keyframes wob{from{transform:rotate(-5deg) scale(.97)}to{transform:rotate(5deg) scale(1.03)}}
+.goof .card img:hover{filter:hue-rotate(160deg) saturate(2)}
+.more{text-align:center;padding:0 0 24px}
+.status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 14px;background:var(--bar);border-top:4px solid var(--ink);font-size:16px}
+dialog{border:4px solid var(--ink);border-radius:18px;background:var(--win);color:var(--ink);box-shadow:10px 10px 0 var(--ink);padding:14px;max-width:min(560px,92vw);font-family:inherit}
+dialog::backdrop{background:rgba(43,27,61,.6)}
+dialog img{width:100%;max-height:60vh;object-fit:contain;border:4px solid var(--ink);border-radius:12px;display:block;background:#e9ddff}
+dialog h2{font-weight:400;font-size:30px;margin:10px 0 2px}
+dialog p{margin:0 0 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="floaters" aria-hidden="true"></div>
+<div class="win">
+  <div class="title">🐾 Cat Browser 9000<span class="dots"><i></i><i></i><i></i></span></div>
+  <div class="tools">
+    <button id="fetch">Fetch new cats</button>
+    <button id="favs" aria-pressed="false">♥ Favorites (0)</button>
+    <button id="goof" aria-pressed="false">Goof mode</button>
+    <div class="addr" id="addr">catbrowser://gallery/all-the-cats</div>
+  </div>
+  <div class="ticker"><span>NOW BROWSING: real cats ★ delivered by actual APIs ★ zero dogs detected ★ click a cat to make it bigger ★ heart the good ones (all of them) ★</span></div>
+  <div class="grid" id="grid"></div>
+  <div class="more" id="more"><button id="loadmore">Load more cats</button></div>
+  <div class="status"><span id="count">Loading cats…</span><span>Photos: The Cat API &amp; CATAAS</span></div>
+</div>
+
+<dialog id="dlg">
+  <img id="big" alt="">
+  <h2 id="bn"></h2><p id="bc"></p>
+  <div class="row">
+    <button id="prev">Previous</button><button id="next">Next</button>
+    <button id="play" aria-pressed="false">Slideshow</button>
+    <button id="heart" aria-pressed="false">♥ Favorite</button>
+    <button id="rename">Rename cat</button>
+    <button id="close">Close</button>
+  </div>
+</dialog>
+
+<script>
+var NAMES=["Sir Biscuit","Gerald","Princess Noodle","Mr. Gloom","Bleh","Doug","Mittens the Third","Tigger Jr.","Professor Whiskers","Sleepy Pete","Void","Captain Fluff","Brenda","Lord Nugget","Pickles","Dr. Toes","Waffles","Big Gary","Steve","Madame Fuzz"];
+var CAPS=["Loaf status: pending.","Has never once been right.","Rules this room. Not the next one.","Sees right through you.","Cool. Very cool. Pls clap.","The first two were a lie.","Lectures at 3 a.m.","Currently unavailable.","Do not look directly.","Sails the couch. Fears the vacuum.","Owes you nothing.","Knocked it off the table. On purpose.","Has opinions about your chair."];
+var cats=[],favs=[],view="all",cur=0,timer=null;
+var grid=document.getElementById("grid"),dlg=document.getElementById("dlg");
+function $(i){return document.getElementById(i)}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function cataas(i){return "https://cataas.com/cat?width=500&height=500&nocache="+Date.now()+"_"+i}
+
+// goofy background
+(function(){var f=$("floaters"),E=["🐱","🐟","🧶","🐾","😹","🥛","🐭"];
+for(var i=0;i<16;i++){var s=document.createElement("span");s.textContent=pick(E);
+s.style.left=(Math.random()*96)+"%";s.style.fontSize=(24+Math.random()*34)+"px";
+s.style.animationDuration=(9+Math.random()*14)+"s";s.style.animationDelay=(-Math.random()*20)+"s";f.appendChild(s)}})();
+
+// favorites persist in the browser
+try{favs=JSON.parse(localStorage.getItem("catbrowser-favs")||"[]")}catch(e){favs=[]}
+function saveFavs(){try{localStorage.setItem("catbrowser-favs",JSON.stringify(favs))}catch(e){}}
+function isFav(k){return favs.some(function(f){return f.src===k.src})}
+function toggleFav(k){
+  if(isFav(k))favs=favs.filter(function(f){return f.src!==k.src});else favs.push(k);
+  saveFavs();render();syncHeart();
+}
+function list(){return view==="favs"?favs:cats}
+
+async function getCats(n){
+  var out=[];
+  try{
+    var r=await fetch("https://api.thecatapi.com/v1/images/search?limit="+Math.min(n,10)+"&size=med");
+    var d=await r.json();
+    out=d.map(function(x){return {src:x.url,from:"api.thecatapi.com"}});
+  }catch(e){}
+  while(out.length<n){out.push({src:cataas(out.length),from:"cataas.com"})}
+  return out.map(function(x){x.n=pick(NAMES);x.c=pick(CAPS);return x});
+}
+async function load(more){
+  $("count").textContent="Loading cats…";
+  var n=await getCats(more?8:12);
+  cats=more?cats.concat(n):n;
+  render();
+}
+function render(){
+  grid.innerHTML="";
+  var L=list();
+  if(!L.length){grid.innerHTML='<div class="empty">'+(view==="favs"?"No favorites yet. Tap a ♥ on a cat you love.":"No cats?! Check your internet and fetch again.")+"</div>"}
+  L.forEach(function(k,i){
+    var c=document.createElement("div");c.className="card";
+    var b=document.createElement("button");b.className="open";b.type="button";
+    var im=document.createElement("img");im.loading="lazy";im.alt=k.n+", a cat";im.src=k.src;
+    im.onerror=function(){im.onerror=null;k.src=cataas(i);im.src=k.src};
+    b.appendChild(im);
+    b.insertAdjacentHTML("beforeend","<b></b><small></small>");
+    b.querySelector("b").textContent=k.n;b.querySelector("small").textContent=k.c;
+    b.onclick=function(){show(i)};
+    var h=document.createElement("button");h.className="heart";h.type="button";h.textContent="♥";
+    h.setAttribute("aria-label","Favorite "+k.n);h.setAttribute("aria-pressed",isFav(k));
+    h.onclick=function(){toggleFav(k)};
+    c.appendChild(b);c.appendChild(h);grid.appendChild(c);
+  });
+  $("favs").textContent="♥ Favorites ("+favs.length+")";
+  $("more").style.display=view==="favs"?"none":"";
+  $("count").textContent=(view==="favs"?"Showing "+L.length+" favorite cats.":L.length+" cats loaded. 0 dogs.");
+}
+function show(i){
+  var L=list();if(!L.length)return;
+  cur=(i+L.length)%L.length;var k=L[cur];
+  var im=$("big");im.src=k.src;im.alt=k.n+", a cat";
+  $("bn").textContent=k.n;$("bc").textContent=k.c;
+  $("addr").textContent="catbrowser://"+k.from+"/"+k.n.toLowerCase().replace(/[^a-z]+/g,"-").replace(/-$/,"");
+  syncHeart();
+  if(!dlg.open)dlg.showModal();
+}
+function syncHeart(){var L=list(),k=L[cur];if(k)$("heart").setAttribute("aria-pressed",isFav(k))}
+function stop(){clearInterval(timer);timer=null;$("play").setAttribute("aria-pressed","false");$("play").textContent="Slideshow"}
+
+$("next").onclick=function(){show(cur+1)};
+$("prev").onclick=function(){show(cur-1)};
+$("close").onclick=function(){dlg.close()};
+$("heart").onclick=function(){var k=list()[cur];if(k)toggleFav(k)};
+$("rename").onclick=function(){
+  var k=list()[cur],n=prompt("New name for this cat:",k.n);
+  if(n&&n.trim()){k.n=n.trim().slice(0,30);$("bn").textContent=k.n;render()}
+};
+$("play").onclick=function(){
+  if(timer){stop();return}
+  $("play").setAttribute("aria-pressed","true");$("play").textContent="Stop slideshow";
+  timer=setInterval(function(){show(cur+1)},2500);
+};
+dlg.addEventListener("close",function(){stop();$("addr").textContent="catbrowser://gallery/"+(view==="favs"?"favorites":"all-the-cats")});
+dlg.addEventListener("click",function(e){if(e.target===dlg)dlg.close()});
+dlg.addEventListener("keydown",function(e){if(e.key==="ArrowRight")show(cur+1);if(e.key==="ArrowLeft")show(cur-1)});
+$("fetch").onclick=function(){view="all";$("favs").setAttribute("aria-pressed","false");load(false)};
+$("loadmore").onclick=function(){load(true)};
+$("favs").onclick=function(){
+  view=view==="favs"?"all":"favs";this.setAttribute("aria-pressed",view==="favs");
+  $("addr").textContent="catbrowser://gallery/"+(view==="favs"?"favorites":"all-the-cats");render();
+};
+$("goof").onclick=function(){
+  var on=document.body.classList.toggle("goof");this.setAttribute("aria-pressed",on);
+  this.textContent=on?"Goof mode: ON":"Goof mode";
+};
+load(false);
+</script>
+</body>
+</html>
